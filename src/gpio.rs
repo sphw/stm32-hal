@@ -296,6 +296,7 @@ macro_rules! set_state {
 // todo: Consolidate these exti macros
 
 // Reduce DRY for setting up interrupts.
+#[cfg(not(feature = "l5"))]
 macro_rules! set_exti {
     ($pin:expr, $trigger:expr, $val:expr, [$(($num:expr, $crnum:expr)),+]) => {
         let exti = unsafe { &(*pac::EXTI::ptr()) };

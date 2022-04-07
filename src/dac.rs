@@ -22,6 +22,7 @@ use pac::dma as dma_p;
 #[cfg(any(
     feature = "f3",
     feature = "l4",
+    feature = "l5",
     feature = "g4",
     feature = "h7",
     feature = "wb",
@@ -29,7 +30,7 @@ use pac::dma as dma_p;
 ))]
 use pac::dma1 as dma_p;
 
-#[cfg(not(any(feature = "f4", feature = "l5")))]
+#[cfg(not(any(feature = "f4")))]
 use crate::dma::{self, ChannelCfg, Dma, DmaChannel};
 
 #[cfg(any(feature = "f3", feature = "l4"))]
@@ -165,13 +166,7 @@ where
         // todo: Currently at default setting for both channels of external pin with buffer enabled.
         // todo make this customizable
         let mode = DacMode::NormExternalOnlyBufEn;
-        #[cfg(not(any(
-            feature = "f3",
-            feature = "f4",
-            feature = "l5",
-            feature = "g4",
-            feature = "wl"
-        )))]
+        #[cfg(not(any(feature = "f3", feature = "f4", feature = "g4", feature = "wl")))]
         regs.mcr.modify(|_, w| unsafe {
             w.mode1().bits(mode as u8);
             w.mode2().bits(mode as u8)
@@ -191,7 +186,7 @@ where
     ///
     /// After the calibration operation, the DAC channel is
     /// disabled.
-    #[cfg(not(any(feature = "f3", feature = "f4", feature = "l5", feature = "g4")))]
+    #[cfg(not(any(feature = "f3", feature = "f4", feature = "g4")))]
     pub fn calibrate_buffer(
         // This function taken from STM32H7xx-hal.
         &mut self,
@@ -231,9 +226,9 @@ where
 
     /// Enable the DAC, for a specific channel.
     pub fn enable(&mut self, channel: DacChannel) {
-        #[cfg(any(feature = "l5", feature = "g4"))]
+        #[cfg(any(feature = "g4"))]
         let cr = &self.regs.dac_cr;
-        #[cfg(not(any(feature = "l5", feature = "g4")))]
+        #[cfg(not(any(feature = "g4")))]
         let cr = &self.regs.cr;
 
         cr.modify(|_, w| match channel {
@@ -245,9 +240,9 @@ where
 
     /// Disable the DAC, for a specific channel.
     pub fn disable(&mut self, channel: DacChannel) {
-        #[cfg(any(feature = "l5", feature = "g4"))]
+        #[cfg(any(feature = "g4"))]
         let cr = &self.regs.dac_cr;
-        #[cfg(not(any(feature = "l5", feature = "g4")))]
+        #[cfg(not(any(feature = "g4")))]
         let cr = &self.regs.cr;
 
         cr.modify(|_, w| match channel {
@@ -278,7 +273,7 @@ where
         // todo let you write u16 directly instead of casting as u32.
         let val = val as u32;
 
-        #[cfg(any(feature = "l5", feature = "g4"))]
+        #[cfg(any(feature = "g4"))]
         match channel {
             DacChannel::C1 => match self.bits {
                 DacBits::EightR => self.regs.dac_dhr8r1.modify(|_, w| unsafe { w.bits(val) }),
@@ -293,7 +288,7 @@ where
             },
         }
 
-        #[cfg(not(any(feature = "l5", feature = "g4")))]
+        #[cfg(not(any(feature = "g4")))]
         match channel {
             DacChannel::C1 => match self.bits {
                 DacBits::EightR => self.regs.dhr8r1.modify(|_, w| unsafe { w.bits(val) }),
@@ -312,7 +307,7 @@ where
     /// Send values to the DAC using DMA. Each trigger (Eg using a timer; the basic timers Tim6
     /// and Tim7 are designed for DAC triggering) sends one word from the buffer to the DAC's
     /// output.
-    #[cfg(not(any(feature = "g0", feature = "f4", feature = "l5")))]
+    #[cfg(not(any(feature = "g0", feature = "f4")))]
     pub unsafe fn write_dma<D>(
         &mut self,
         buf: &[u16],
@@ -344,14 +339,14 @@ where
         // When an external trigger (but not a software trigger) occurs while the DMAENx bit is set, the
         // value of the DAC_DHRx register is transferred into the DAC_DORx register when the
         // transfer is complete, and a DMA request is generated.
-        #[cfg(any(feature = "l5", feature = "g4"))]
+        #[cfg(any(feature = "g4"))]
         match dac_channel {
             DacChannel::C1 => self.regs.dac_cr.modify(|_, w| w.dmaen1().set_bit()),
             #[cfg(not(feature = "wl"))]
             DacChannel::C2 => self.regs.dac_cr.modify(|_, w| w.dmaen2().set_bit()),
         }
 
-        #[cfg(not(any(feature = "l5", feature = "g4")))]
+        #[cfg(not(any(feature = "g4")))]
         match dac_channel {
             DacChannel::C1 => self.regs.cr.modify(|_, w| w.dmaen1().set_bit()),
             #[cfg(not(feature = "wl"))]
@@ -381,7 +376,7 @@ where
         // For each DAC channelx, an interrupt is also generated if its corresponding DMAUDRIEx bit
         // in the DAC_CR register is enabled.
 
-        #[cfg(any(feature = "l5", feature = "g4"))]
+        #[cfg(any(feature = "g4"))]
         let periph_addr = match dac_channel {
             DacChannel::C1 => match &self.bits {
                 DacBits::EightR => &self.regs.dac_dhr8r1 as *const _ as u32,
@@ -396,7 +391,7 @@ where
             },
         };
 
-        #[cfg(not(any(feature = "l5", feature = "g4")))]
+        #[cfg(not(any(feature = "g4")))]
         let periph_addr = match dac_channel {
             DacChannel::C1 => match &self.bits {
                 DacBits::EightR => &self.regs.dhr8r1 as *const _ as u32,
@@ -531,9 +526,9 @@ where
 
     /// Enable the DMA Underrun interrupt - the only interrupt available.
     pub fn enable_interrupt(&mut self, channel: DacChannel) {
-        #[cfg(any(feature = "l5", feature = "g4"))]
+        #[cfg(any(feature = "g4"))]
         let cr = &self.regs.dac_cr;
-        #[cfg(not(any(feature = "l5", feature = "g4")))]
+        #[cfg(not(any(feature = "g4")))]
         let cr = &self.regs.cr;
 
         cr.modify(|_, w| match channel {

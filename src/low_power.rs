@@ -1,15 +1,12 @@
 //! This module contains code used to place the MCU in low power modes.
 //! Reference section 5.3.3: `Low power modes` of the L4 Reference Manual.
 
-use crate::{
-    clocks::Clocks,
-    pac::{PWR, RCC},
-};
+use crate::{clocks::Clocks, pac::PWR};
 
 #[cfg(any(feature = "l4", feature = "l5"))]
 use crate::clocks::MsiRange;
 
-use cortex_m::{asm::wfi, peripheral::SCB, Peripherals};
+use cortex_m::{asm::wfi, Peripherals};
 
 use cfg_if::cfg_if;
 
@@ -30,7 +27,6 @@ pub enum StopMode {
 /// implementations that rely on system clock or APB speed.
 #[cfg(any(feature = "l4", feature = "l5"))]
 pub fn low_power_run(clocks: &mut Clocks, speed: MsiRange) {
-    let rcc = unsafe { &(*RCC::ptr()) };
     let pwr = unsafe { &(*PWR::ptr()) };
 
     // Decrease the system clock frequency below 2 MHz

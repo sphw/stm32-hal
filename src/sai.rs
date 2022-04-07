@@ -590,8 +590,8 @@ where
 {
     /// Initialize a SAI peripheral, including  enabling and resetting
     /// its RCC peripheral clock.
-    pub fn new(regs: R, config_a: SaiConfig, config_b: SaiConfig, clocks: &Clocks) -> Self {
-        free(|cs| {
+    pub fn new(regs: R, config_a: SaiConfig, config_b: SaiConfig, _clocks: &Clocks) -> Self {
+        free(|_cs| {
             let rcc = unsafe { &(*RCC::ptr()) };
             R::en_reset(rcc);
         });

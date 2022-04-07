@@ -13,7 +13,7 @@ use crate::{
     util::{BaudPeriph, RccPeriph},
 };
 
-#[cfg(any(feature = "f3", feature = "l4"))]
+#[cfg(any(feature = "f3", feature = "l4", feature = "l5"))]
 use crate::util::DmaPeriph;
 
 use core::ops::Deref;
@@ -178,7 +178,7 @@ where
         while result.regs.cr1.read().ue().bit_is_set() {}
 
         #[cfg(not(any(feature = "f3", feature = "f4")))]
-        let word_len_bits = result.config.word_len.bits();
+        let _ = result.config.word_len.bits();
 
         // Set up transmission. See L44 RM, section 38.5.2: "Character Transmission Procedures".
         // 1. Program the M bits in USART_CR1 to define the word length.

@@ -16,7 +16,7 @@ use crate::{
     util::RccPeriph,
 };
 
-#[cfg(any(feature = "f3", feature = "l4"))]
+#[cfg(any(feature = "f3", feature = "l4", feature = "l5"))]
 use crate::util::DmaPeriph;
 
 #[cfg(any(feature = "g0"))]

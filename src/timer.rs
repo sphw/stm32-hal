@@ -14,7 +14,7 @@ use cortex_m::interrupt::free;
 #[cfg(feature = "embedded-hal")]
 use embedded_hal::{
     blocking::delay::{DelayMs, DelayUs},
-    timer::{CountDown, Periodic},
+    timer::Periodic,
 };
 
 // todo: LPTIM (low-power timers) and HRTIM (high-resolution timers). And Advanced control functionality
@@ -745,6 +745,7 @@ macro_rules! make_timer {
 // We use macros to support the varying number of capture compare channels available on
 // different timers.
 // Note that there's lots of DRY between these implementations.
+#[cfg(not(feature = "l5"))]
 macro_rules! cc_4_channels {
     ($TIMX:ident, $res:ident) => {
         impl Timer<pac::$TIMX> {

@@ -1,5 +1,6 @@
 //! This is an internal module that contains utility functionality used by other modules.
 
+#[cfg(feature = "l4")]
 use core::ops::Deref;
 
 use crate::{
@@ -493,7 +494,7 @@ cfg_if::cfg_if! {
 // I2cDevice::Four => {
 
 // todo: DMA2 support.
-#[cfg(any(feature = "f3", feature = "l4"))]
+#[cfg(any(feature = "f3", feature = "l4", feature = "l5"))]
 pub trait DmaPeriph {
     #[cfg(any(feature = "f3", feature = "l4"))]
     fn read_chan() -> DmaChannel;
@@ -551,7 +552,7 @@ impl DmaPeriph for pac::I2C2 {
     }
 }
 
-#[cfg(any(feature = "f3", feature = "l4"))]
+#[cfg(any(feature = "f3", feature = "l4", feature = "l5"))]
 impl DmaPeriph for pac::SPI1 {
     #[cfg(any(feature = "f3", feature = "l4"))]
     fn read_chan() -> DmaChannel {

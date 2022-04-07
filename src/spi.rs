@@ -14,7 +14,7 @@ use crate::{
     util::RccPeriph,
 };
 
-#[cfg(any(feature = "f3", feature = "l4"))]
+#[cfg(any(feature = "f3", feature = "l4", feature = "l5"))]
 use crate::util::DmaPeriph;
 
 #[cfg(feature = "g0")]
@@ -22,6 +22,7 @@ use crate::pac::dma as dma_p;
 #[cfg(any(
     feature = "f3",
     feature = "l4",
+    feature = "l5",
     feature = "g4",
     feature = "h7",
     feature = "wb",
@@ -29,11 +30,8 @@ use crate::pac::dma as dma_p;
 ))]
 use crate::pac::dma1 as dma_p;
 
-#[cfg(not(any(feature = "f4", feature = "l5")))]
-use crate::dma::{self, Dma, DmaChannel, ChannelCfg};
-
-#[cfg(any(feature = "f3", feature = "l4"))]
-use crate::dma::DmaInput;
+#[cfg(not(any(feature = "f4")))]
+use crate::dma::{self, ChannelCfg, Dma, DmaChannel};
 
 use cfg_if::cfg_if;
 
@@ -485,10 +483,11 @@ where
                 let not_empty = sr.rxp().bit_is_set();
             } else {
                 let crce = sr.crcerr().bit_is_set();
-                let not_empty = sr.rxne().bit_is_set();
+            let not_empty = sr.rxne().bit_is_set();
+
+                //let busy = sr.bsy().bit_is_set();
             }
         }
-
         if sr.ovr().bit_is_set() {
             Err(nb::Error::Other(Error::Overrun))
         } else if sr.modf().bit_is_set() {
@@ -568,11 +567,16 @@ where
         Ok(())
     }
 
-    #[cfg(not(any(feature = "g0", feature = "f4", feature = "l5")))]
+    #[cfg(not(any(feature = "g0", feature = "f4")))]
     /// Transmit data using DMA. See L44 RM, section 40.4.9: Communication using DMA.
     /// Note that the `channel` argument has no effect on F3 and L4.
-    pub unsafe fn write_dma<D>(&mut self, buf: &[u8], channel: DmaChannel, channel_cfg: ChannelCfg, dma: &mut Dma<D>)
-    where
+    pub unsafe fn write_dma<D>(
+        &mut self,
+        buf: &[u8],
+        channel: DmaChannel,
+        channel_cfg: ChannelCfg,
+        dma: &mut Dma<D>,
+    ) where
         D: Deref<Target = dma_p::RegisterBlock>,
     {
         // Static write and read buffers?
@@ -633,11 +637,16 @@ where
         // (todo: Should be already set. Should we disable it at the top of this fn just in case?)
     }
 
-    #[cfg(not(any(feature = "g0", feature = "f4", feature = "l5")))]
+    #[cfg(not(any(feature = "g0", feature = "f4")))]
     /// Receive data using DMA. See L44 RM, section 40.4.9: Communication using DMA.
     /// Note thay the `channel` argument has no effect on F3 and L4.
-    pub unsafe fn read_dma<D>(&mut self, buf: &mut [u8], channel: DmaChannel, channel_cfg: ChannelCfg, dma: &mut Dma<D>)
-    where
+    pub unsafe fn read_dma<D>(
+        &mut self,
+        buf: &mut [u8],
+        channel: DmaChannel,
+        channel_cfg: ChannelCfg,
+        dma: &mut Dma<D>,
+    ) where
         D: Deref<Target = dma_p::RegisterBlock>,
     {
         // todo: Accept u16 words too.
@@ -683,7 +692,7 @@ where
 
     // todo: pub fn transfer_dma()?
 
-    #[cfg(not(any(feature = "g0", feature = "h7", feature = "f4", feature = "l5")))]
+    #[cfg(not(any(feature = "g0", feature = "h7", feature = "f4")))]
     /// Stop a DMA transfer. Stops the channel, and disables the `txdmaen` and `rxdmaen` bits.
     /// Run this after each transfer completes - you may wish to do this in an interrupt
     /// (eg DMA transfer complete) instead of blocking.

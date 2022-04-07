@@ -21,6 +21,7 @@ use crate::pac::flash::BANK;
 
 use core;
 
+#[cfg(not(feature = "l5"))]
 use cfg_if::cfg_if;
 
 const FLASH_KEY1: u32 = 0x4567_0123;

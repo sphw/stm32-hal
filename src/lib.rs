@@ -409,7 +409,7 @@ pub mod dfsdm;
 // todo: F4 needs some mods. So, only working on L4 and G4.
 // todo: L5 has a PAC bug on CCR registers past 1.
 // https://github.com/stm32-rs/stm32-rs/issues/551
-#[cfg(not(any(feature = "f4", feature = "l5")))]
+#[cfg(not(any(feature = "f4")))]
 pub mod dma;
 
 // #[cfg(not(any(feature = "h747cm4", feature = "h747cm7")))]

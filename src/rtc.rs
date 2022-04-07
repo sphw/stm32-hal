@@ -4,7 +4,10 @@
 
 //! Uses [Chrono](https://docs.rs/chrono) for dates and times.
 
-use crate::pac::{EXTI, PWR, RCC, RTC};
+#[cfg(not(any(feature = "l5", feature = "g0", feature = "wb", feature = "wl")))]
+use crate::pac::EXTI;
+
+use crate::pac::{PWR, RCC, RTC};
 use core::convert::TryInto;
 
 use cortex_m::interrupt::free;
@@ -129,10 +132,10 @@ impl Rtc {
         // See L4 RM, `Backup domain access` section.
         free(|_| {
             let rcc = unsafe { &(*RCC::ptr()) };
-            let mut pwr = unsafe { &(*PWR::ptr()) };
+            let pwr = unsafe { &(*PWR::ptr()) };
 
             cfg_if! {
-                if #[cfg(any(feature = "f3", feature = "f4"))] {
+                if #[cfg(any(feature = "f3", fea= "f4"))] {
                     rcc.apb1enr.modify(|_, w| w.pwren().set_bit());
                     pwr.cr.read(); // read to allow the pwr clock to enable
                     pwr.cr.modify(|_, w| w.dbp().set_bit());
@@ -386,7 +389,7 @@ impl Rtc {
         // L4 RM, 5.3.11: To wakeup from Stop mode with an RTC wakeup event, it is necessary to:
         // • Configure the EXTI Line 20 to be sensitive to rising edge
         // • Configure the RTC to generate the RTC alarm
-
+        #[cfg(not(any(feature = "l5", feature = "g0", feature = "wb", feature = "wl")))]
         let mut exti = unsafe { &(*EXTI::ptr()) };
 
         cfg_if! {
