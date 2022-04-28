@@ -463,6 +463,9 @@ feature = "wl",
 )))]
 pub mod qspi;
 
+#[cfg(feature = "l5")]
+pub mod ospi;
+
 // Note: Some F4 variants support RNG, but we haven't figured out the details yet. Send a PR if interested.
 #[cfg(not(any(
     feature = "f3",
