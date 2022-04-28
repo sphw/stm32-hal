@@ -837,7 +837,7 @@ impl Rtc {
     /// Get the current date.
     pub fn get_date(&mut self) -> NaiveDate {
         NaiveDate::from_ymd(
-            self.get_year().into(),
+            (self.get_year() + 2000).into(),
             self.get_month().into(),
             self.get_day().into(),
         )
@@ -846,7 +846,7 @@ impl Rtc {
     /// Get the current datetime.
     pub fn get_datetime(&mut self) -> NaiveDateTime {
         NaiveDate::from_ymd(
-            self.get_year().into(),
+            (self.get_year() + 2000).into(),
             self.get_month().into(),
             self.get_day().into(),
         )
